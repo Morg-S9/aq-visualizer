@@ -19,5 +19,30 @@ weather = requests.get(
 airquality = requests.get(
     "http://api.openweathermap.org/data/2.5/air_pollution", params=parameters, timeout=20)
 
-jprint(weather.json())
-jprint(airquality.json())
+aqlevels = airquality.json()["list"][0]
+
+aqi = aqlevels["main"]["aqi"]
+
+pm2_5 = aqlevels["components"]["pm2_5"]
+pm10 = aqlevels["components"]["pm10"]
+co = aqlevels["components"]["co"]
+no2 = aqlevels["components"]["no2"]
+o3 = aqlevels["components"]["o3"]
+so2 = aqlevels["components"]["so2"]
+
+print(
+    "Air Quality Index: " + str(aqi),
+    "\n",
+    "\n",
+    "PM2.5: " + str(pm2_5) + "ppm",
+    "\n",
+    "PM10: " + str(pm10) + "ppm",
+    "\n",
+    "Carbon Monoxide: " + str(co),
+    "\n",
+    "Nitrogen Dioxide: " + str(no2),
+    "\n",
+    "Ozone: " + str(o3),
+    "\n",
+    "Sulphur Dioxide: " + str(so2)
+)
