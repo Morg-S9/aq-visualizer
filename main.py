@@ -34,15 +34,17 @@ print(
     "Air Quality Index: " + str(aqi),
     "\n",
     "\n",
-    "PM2.5: " + str(pm2_5) + "ppm",
+    "PM2.5: " + str(pm2_5) + "μg/m3",
     "\n",
-    "PM10: " + str(pm10) + "ppm",
+    "PM10: " + str(pm10) + "μg/m3",
     "\n",
-    "Carbon Monoxide: " + str(co),
+    "Carbon Monoxide: " + str(co) + "μg/m3",
     "\n",
-    "Nitrogen Dioxide: " + str(no2),
+    "Nitrogen Dioxide: " + str(no2) + "μg/m3",
     "\n",
-    "Ozone: " + str(o3),
+    "Ozone: " + str(o3) + "μg/m3",
     "\n",
-    "Sulphur Dioxide: " + str(so2)
+    "Sulphur Dioxide: " + str(so2) + "μg/m3",
+    "\n\n",
+    "(μg/m3 = Micrograms per meter cubed)"
 )
