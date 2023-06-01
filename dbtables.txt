@@ -1,0 +1,31 @@
+CREATE TABLE weather (
+	timestamp TIMESTAMP,
+	temp DECIMAL(5, 2),
+	temp_high DECIMAL(5, 2),
+	temp_low DECIMAL(5, 2),
+	humidity DECIMAL(5, 2),
+	wind_speed DECIMAL(5, 2),
+	wind_dir INT,
+	wind_gust DECIMAL(5, 2),
+	pressure_sea INT,
+	pressure_grnd INT,
+	precipitation BOOL
+);
+
+CREATE TABLE precipitation (
+	timestamp TIMESTAMP,
+	type varchar(100) NOT NULL,
+	volume DECIMAL(5, 2),
+	volume_3h DECIMAL(5, 2)
+);
+
+CREATE TABLE air (
+	timestamp TIMESTAMP,
+	aqi INT,
+	pm2_5 DECIMAL(5, 2),
+	pm10 DECIMAL(5, 2),
+	co DECIMAL(5, 2),
+	no2 DECIMAL(5, 2),
+	o3 DECIMAL(5, 2),
+	so2 DECIMAL(5, 2)
+);

@@ -1,6 +1,14 @@
 from datetime import datetime
 import json
 import requests
+import psycopg2
+
+conn = psycopg2.connect(database="data",
+                        host="192.168.1.9",
+                        user="root",
+                        password="1234",
+                        port="5432")
+db = conn.cursor()
 
 def jprint(obj):
     # create a formatted string of the Python JSON object
@@ -25,29 +33,8 @@ weatherData = weather.json()["main"]
 aqi = airquality.json()["list"][0]["main"]["aqi"]
 airData = airquality.json()["list"][0]["components"]
 
-print(
-    "Timestamp: " + str(datetime.now().isoformat()),
-    "\n",
-    "Location: " + location,
-    "\n\n",
-    "Air Quality Index: " + str(aqi),
-    "\n",
-    "PM2.5: " + str(airData["pm2_5"]) + "μg/m3",
-    "\n",
-    "PM10: " + str(airData["pm10"]) + "μg/m3",
-    "\n",
-    "Carbon Monoxide: " + str(airData["co"]) + "μg/m3",
-    "\n",
-    "Nitrogen Dioxide: " + str(airData["no2"]) + "μg/m3",
-    "\n",
-    "Ozone: " + str(airData["o3"]) + "μg/m3",
-    "\n",
-    "Sulphur Dioxide: " + str(airData["so2"]) + "μg/m3",
-    "\n\n",
-    "(μg/m3 = Micrograms per meter cubed)\n",
-)
-
-print(
-    "Weather:\nTemprature: " + str(round(weatherData["temp"])) + "°F",
-    "\nHumidity: " + str(round(weatherData["humidity"])) + "°F"
-)
+timestamp = "\"" + datetime.now().isoformat() + "\""
+print("INSERT INTO weather VALUES ("
+      + timestamp
+      + "," + weatherData["temp"]
+      )
