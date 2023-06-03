@@ -1,0 +1,30 @@
+CREATE TABLE weather (
+	timestamp TIMESTAMP PRIMARY KEY,
+	weather_id INT,
+	temp DECIMAL(7, 2),
+	temp_high DECIMAL(7, 2),
+	temp_low DECIMAL(7, 2),
+	humidity DECIMAL(7, 2),
+	wind_speed DECIMAL(7, 2),
+	wind_dir INT,
+	pressure DECIMAL(7, 2),
+	precipitation BOOL
+);
+
+CREATE TABLE precipitation (
+	timestamp TIMESTAMP PRIMARY KEY,
+	weather_id INT,
+	volume DECIMAL(7, 2),
+	volume_2h DECIMAL(7, 2)
+);
+
+CREATE TABLE air (
+	timestamp TIMESTAMP PRIMARY KEY,
+	aqi INT,
+	pm2_5 DECIMAL(7, 2),
+	pm10 DECIMAL(7, 2),
+	co DECIMAL(7, 2),
+	no2 DECIMAL(7, 2),
+	o2 DECIMAL(7, 2),
+	so2 DECIMAL(7, 2)
+);
