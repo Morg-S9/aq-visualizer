@@ -4,11 +4,11 @@ import requests
 import psycopg2
 import time
 
+
 def jprint(obj):
     # create a formatted string of the Python JSON object
     text = json.dumps(obj, sort_keys=True, indent=4)
     print(text)
-
 
 # Create lists for Rain and Snow weather IDs
 with open("precip_id.txt", 'r', encoding="utf-8") as data:
@@ -22,21 +22,22 @@ for item in data_sets[0].split("\n"):
 for item in data_sets[1].split("\n"):
     snowids.append(int(item))
 
+# Setup connection configs
+
+with open('config.json', 'r', encoding="utf-8") as f:
+    config = json.load(f)
+
 # Setup database connection
-
-dbinfo = open("dbinfo.txt", 'r', encoding="utf-8").read().split("\n")
-
-conn = psycopg2.connect(database=dbinfo[0],
-                        host=dbinfo[1],
-                        user=dbinfo[2],
-                        password=dbinfo[3],
-                        port=dbinfo[4])
+conn = psycopg2.connect(database=config['database']['name'],
+                        host=config['database']['host'],
+                        user=config['database']['username'],
+                        password=config['database']['password'],
+                        port=config['database']['port'])
 db = conn.cursor()
 
 # Set API parameters
-apikey = open("apikey.txt", 'r', encoding="utf-8").read()
 parameters = {
-    "appid": apikey,
+    "appid": config['api']['apikey'],
     "lat": "39.144379",
     "lon": "-76.528839",
     "units": "imperial"
@@ -49,13 +50,14 @@ while True:
         "https://api.openweathermap.org/data/2.5/weather", params=parameters, timeout=20)
     airquality = requests.get(
         "https://api.openweathermap.org/data/2.5/air_pollution", params=parameters, timeout=20)
-    
+
     # Check status code for errors
     if weather.status_code != 200 or airquality.status_code != 200:
         print("\nAPI error. Status:\n"
               + "Weather: " + str(weather.status_code) + "\n" + weather.text
-              + "\nAir Qual.: " + str(airquality.status_code) + "\n" + weather.text
-        )
+              + "\nAir Qual.: " +
+              str(airquality.status_code) + "\n" + weather.text
+              )
         exit()
     else:
         print("Done.\n")
@@ -77,17 +79,17 @@ while True:
 
     # Compile weather database command
     db.execute("INSERT INTO weather VALUES ("
-            + timestamp
-            + "," + str(weatherID)
-            + "," + str(envData["temp"])
-            + "," + str(envData["temp_max"])
-            + "," + str(envData["temp_min"])
-            + "," + str(envData["humidity"])
-            + "," + str(windData["speed"])
-            + "," + str(windData["deg"])
-            + "," + str(envData["pressure"])
-            + "," + str(PRECIP) + ");"
-            )
+               + timestamp
+               + "," + str(weatherID)
+               + "," + str(envData["temp"])
+               + "," + str(envData["temp_max"])
+               + "," + str(envData["temp_min"])
+               + "," + str(envData["humidity"])
+               + "," + str(windData["speed"])
+               + "," + str(windData["deg"])
+               + "," + str(envData["pressure"])
+               + "," + str(PRECIP) + ");"
+               )
 
     # Check if precip database command needs to be made
     if PRECIP is True:
@@ -101,25 +103,24 @@ while True:
         else:
             h3precip = "NULL"
         db.execute("INSERT INTO precipitation VALUES ("
-                + timestamp
-                + "," + str(weatherID)
-                + "," + str(precipData["1h"])
-                + "," + str(h3precip) + ");"
-                )
+                   + timestamp
+                   + "," + str(weatherID)
+                   + "," + str(precipData["1h"])
+                   + "," + str(h3precip) + ");"
+                   )
 
     # Compile air quality database command
     db.execute("INSERT INTO air VALUES ("
-            + timestamp
-            + "," + str(aqi)
-            + "," + str(airData["pm2_5"])
-            + "," + str(airData["pm10"])
-            + "," + str(airData["co"])
-            + "," + str(airData["no2"])
-            + "," + str(airData["o3"])
-            + "," + str(airData["so2"]) + ");")
+               + timestamp
+               + "," + str(aqi)
+               + "," + str(airData["pm2_5"])
+               + "," + str(airData["pm10"])
+               + "," + str(airData["co"])
+               + "," + str(airData["no2"])
+               + "," + str(airData["o3"])
+               + "," + str(airData["so2"]) + ");")
 
     # Commit changes to database and wait
     conn.commit()
     print("Data stored. Timestamp: " + timestamp)
-    
     time.sleep(3600)

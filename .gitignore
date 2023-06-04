@@ -1,6 +1,4 @@
 # Python Virtual Environment (for development)
 /venv/
-# OWM API key
-apikey.txt
-# Database connection info
-dbinfo.txt
+# Program Config (refer to config.sample.json)
+config.json
