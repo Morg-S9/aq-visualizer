@@ -15,7 +15,7 @@ CREATE TABLE precipitation (
 	timestamp TIMESTAMP PRIMARY KEY,
 	weather_id INT,
 	volume DECIMAL(7, 2),
-	volume_2h DECIMAL(7, 2)
+	volume_3h DECIMAL(7, 2)
 );
 
 CREATE TABLE air (

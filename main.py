@@ -23,16 +23,20 @@ for item in data_sets[1].split("\n"):
     snowids.append(int(item))
 
 # Setup database connection
-conn = psycopg2.connect(database="data",
-                        host="192.168.1.9",
-                        user="root",
-                        password="1234",
-                        port="5432")
+
+dbinfo = open("dbinfo.txt", 'r', encoding="utf-8").read().split("\n")
+
+conn = psycopg2.connect(database=dbinfo[0],
+                        host=dbinfo[1],
+                        user=dbinfo[2],
+                        password=dbinfo[3],
+                        port=dbinfo[4])
 db = conn.cursor()
 
 # Set API parameters
+apikey = open("apikey.txt", 'r', encoding="utf-8").read()
 parameters = {
-    "apikey": "bc1321f88951a4ba65bc02e181d4ca60",
+    "appid": apikey,
     "lat": "39.144379",
     "lon": "-76.528839",
     "units": "imperial"
@@ -117,4 +121,5 @@ while True:
     # Commit changes to database and wait
     conn.commit()
     print("Data stored. Timestamp: " + timestamp)
+    
     time.sleep(3600)
