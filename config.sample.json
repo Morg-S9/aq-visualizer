@@ -7,6 +7,12 @@
         "port": "5432"
     },
     "api": {
-        "apikey": ""
+        "apikey": "",
+        "latitude": "",
+        "longitude": "",
+        "units": ""
+    },
+    "program": {
+        "waittimer": 3600
     }
 }

@@ -2,3 +2,5 @@
 /venv/
 # Program Config (refer to config.sample.json)
 config.json
+# Random things that don't need to be added I think
+/__pycache__

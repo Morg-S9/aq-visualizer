@@ -1,14 +1,8 @@
 from datetime import datetime
 import json
+import time
 import requests
 import psycopg2
-import time
-
-
-def jprint(obj):
-    # create a formatted string of the Python JSON object
-    text = json.dumps(obj, sort_keys=True, indent=4)
-    print(text)
 
 # Create lists for Rain and Snow weather IDs
 with open("precip_id.txt", 'r', encoding="utf-8") as data:
@@ -38,9 +32,9 @@ db = conn.cursor()
 # Set API parameters
 parameters = {
     "appid": config['api']['apikey'],
-    "lat": "39.144379",
-    "lon": "-76.528839",
-    "units": "imperial"
+    "lat": config['api']['latitude'],
+    "lon": config['api']['longitude'],
+    "units": config['api']['units']
 }
 
 while True:
@@ -58,6 +52,7 @@ while True:
               + "\nAir Qual.: " +
               str(airquality.status_code) + "\n" + weather.text
               )
+        conn.close()
         exit()
     else:
         print("Done.\n")
@@ -93,20 +88,25 @@ while True:
 
     # Check if precip database command needs to be made
     if PRECIP is True:
+        print("Precipitation data will be included.\n ")
         if weatherID in rainids:
             precipData = weather.json()["rain"]
         else:
             precipData = weather.json()["snow"]
-
-        if "3h" in precipData.keys():
-            h3precip = precipData["3h"]
+        if "1h" in precipData.keys():
+            H1PRECIP = precipData["1h"]
         else:
-            h3precip = "NULL"
+            H1PRECIP = "NULL"
+        if "3h" in precipData.keys():
+            H3PRECIP = precipData["3h"]
+        else:
+            H3PRECIP = "NULL"
+
         db.execute("INSERT INTO precipitation VALUES ("
                    + timestamp
                    + "," + str(weatherID)
-                   + "," + str(precipData["1h"])
-                   + "," + str(h3precip) + ");"
+                   + "," + str(H1PRECIP)
+                   + "," + str(H3PRECIP) + ");"
                    )
 
     # Compile air quality database command
@@ -122,5 +122,5 @@ while True:
 
     # Commit changes to database and wait
     conn.commit()
-    print("Data stored. Timestamp: " + timestamp)
-    time.sleep(3600)
+    print("Data stored. Timestamp: " + timestamp + "\n")
+    time.sleep(config['program']['waittimer'])

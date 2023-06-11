@@ -25,6 +25,6 @@ CREATE TABLE air (
 	pm10 DECIMAL(7, 2),
 	co DECIMAL(7, 2),
 	no2 DECIMAL(7, 2),
-	o2 DECIMAL(7, 2),
+	o3 DECIMAL(7, 2),
 	so2 DECIMAL(7, 2)
 );
