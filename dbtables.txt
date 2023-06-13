@@ -1,5 +1,5 @@
 CREATE TABLE weather (
-	timestamp TIMESTAMP PRIMARY KEY,
+	timestamp TIMESTAMP with time zone PRIMARY KEY,
 	weather_id INT,
 	temp DECIMAL(7, 2),
 	temp_high DECIMAL(7, 2),

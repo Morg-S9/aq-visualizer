@@ -2,11 +2,19 @@
     "database": {
         "host": "",
         "name": "",
-        "username": "",
-        "password": "",
-        "port": "5432"
+        "port": "5432",
+        "logins": {
+            "collect": {
+                "username": "",
+                "password": ""
+            },
+            "api": {
+                "username": "",
+                "password": ""
+            }
+        }
     },
-    "api": {
+    "openweatherapi": {
         "apikey": "",
         "latitude": "",
         "longitude": "",

@@ -1,6 +1,7 @@
 from datetime import datetime
-import json
 import time
+import simplejson as json
+import pytz
 import requests
 import psycopg2
 
@@ -17,25 +18,47 @@ for item in data_sets[1].split("\n"):
     snowids.append(int(item))
 
 # Setup connection configs
-
 with open('config.json', 'r', encoding="utf-8") as f:
     config = json.load(f)
 
-# Setup database connection
-conn = psycopg2.connect(database=config['database']['name'],
-                        host=config['database']['host'],
-                        user=config['database']['username'],
-                        password=config['database']['password'],
-                        port=config['database']['port'])
-db = conn.cursor()
+# Database connection function
+def db_connect():
+    conn = psycopg2.connect(database=config['database']['name'],
+                            host=config['database']['host'],
+                            user=config['database']['logins']['collect']['username'],
+                            password=config['database']['logins']['collect']['password'],
+                            port=config['database']['port'])
+    db = conn.cursor()
+    return conn, db
+
 
 # Set API parameters
 parameters = {
-    "appid": config['api']['apikey'],
-    "lat": config['api']['latitude'],
-    "lon": config['api']['longitude'],
-    "units": config['api']['units']
+    "appid": config['openweatherapi']['apikey'],
+    "lat": config['openweatherapi']['latitude'],
+    "lon": config['openweatherapi']['longitude'],
+    "units": config['openweatherapi']['units']
 }
+
+# Compile database query templates
+weatherTemplate = """
+    INSERT INTO weather
+    (timestamp, weather_id, temp, temp_high, temp_low, humidity, wind_speed, wind_dir, pressure, precipitation)
+    VALUES
+    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+"""
+aqTemplate = """
+    INSERT INTO air
+    (timestamp, aqi, pm2_5, pm10, co, no2, o3, so2)
+    VALUES
+    (%s, %s, %s, %s, %s, %s, %s, %s)
+"""
+precipTemplate = """
+    INSERT INTO precipitation (
+    (timestamp, weather_id, volume, volume_3h)
+    VALUES
+    (%s, %s, %s, %s)
+"""
 
 while True:
     # Make API Requests
@@ -52,13 +75,12 @@ while True:
               + "\nAir Qual.: " +
               str(airquality.status_code) + "\n" + weather.text
               )
-        conn.close()
-        exit()
+        exit(1)
     else:
         print("Done.\n")
 
     # Sort through data
-    timestamp = "'" + datetime.now().isoformat() + "'"
+    timestamp = "'" + datetime.now(pytz.UTC).isoformat() + "'"
     location = weather.json()["name"]
     weatherID = weather.json()["weather"][0]["id"]
     envData = weather.json()["main"]
@@ -72,23 +94,31 @@ while True:
     else:
         PRECIP = False
 
-    # Compile weather database command
-    db.execute("INSERT INTO weather VALUES ("
-               + timestamp
-               + "," + str(weatherID)
-               + "," + str(envData["temp"])
-               + "," + str(envData["temp_max"])
-               + "," + str(envData["temp_min"])
-               + "," + str(envData["humidity"])
-               + "," + str(windData["speed"])
-               + "," + str(windData["deg"])
-               + "," + str(envData["pressure"])
-               + "," + str(PRECIP) + ");"
-               )
-
-    # Check if precip database command needs to be made
+    # Tupilize (is that even a word?) data to send to database
+    weatherQuery = (
+        timestamp,
+        weatherID,
+        envData["temp"],
+        envData["temp_max"],
+        envData["temp_min"],
+        envData["humidity"],
+        windData["speed"],
+        windData["deg"],
+        envData["pressure"],
+        PRECIP
+    )
+    aqQuery = (
+        timestamp,
+        aqi,
+        airData["pm2_5"],
+        airData["pm10"],
+        airData["co"],
+        airData["no2"],
+        airData["o3"],
+        airData["so2"]
+    )
+    # Check precip data and tupilize if necessary
     if PRECIP is True:
-        print("Precipitation data will be included.\n ")
         if weatherID in rainids:
             precipData = weather.json()["rain"]
         else:
@@ -102,25 +132,25 @@ while True:
         else:
             H3PRECIP = "NULL"
 
-        db.execute("INSERT INTO precipitation VALUES ("
-                   + timestamp
-                   + "," + str(weatherID)
-                   + "," + str(H1PRECIP)
-                   + "," + str(H3PRECIP) + ");"
-                   )
+        precipQuery = (
+            timestamp,
+            weatherID,
+            H1PRECIP,
+            H3PRECIP
+        )
 
-    # Compile air quality database command
-    db.execute("INSERT INTO air VALUES ("
-               + timestamp
-               + "," + str(aqi)
-               + "," + str(airData["pm2_5"])
-               + "," + str(airData["pm10"])
-               + "," + str(airData["co"])
-               + "," + str(airData["no2"])
-               + "," + str(airData["o3"])
-               + "," + str(airData["so2"]) + ");")
+    # Initiate database connection
+    conn, db = db_connect()
+
+    # Execute database commands
+    db.execute(weatherTemplate, weatherQuery)
+    db.execute(aqTemplate, aqQuery)
+    if PRECIP is True:
+        print("Precipitation data will be included.\n")
+        db.execute(precipTemplate, precipQuery)
 
     # Commit changes to database and wait
     conn.commit()
+    conn.close()
     print("Data stored. Timestamp: " + timestamp + "\n")
     time.sleep(config['program']['waittimer'])
