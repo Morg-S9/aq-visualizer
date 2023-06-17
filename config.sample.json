@@ -21,6 +21,7 @@
         "units": ""
     },
     "program": {
-        "waittimer": 3600
+        "waittimer": 3600,
+        "apilimit": 10
     }
 }

@@ -4,3 +4,5 @@
 config.json
 # Random things that don't need to be added I think
 /__pycache__
+# Playground file, not really necesscary to commit
+test.py

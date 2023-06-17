@@ -1,3 +1,8 @@
+"""
+AcQuire Data Collector
+Collects data from OpenWeatherAPI and stores it
+"""
+
 from datetime import datetime
 import time
 import simplejson as json
@@ -149,8 +154,10 @@ while True:
         print("Precipitation data will be included.\n")
         db.execute(precipTemplate, precipQuery)
 
-    # Commit changes to database and wait
+    # Commit changes to database and wait defined time in config file
     conn.commit()
+    
+    db.close()
     conn.close()
     print("Data stored. Timestamp: " + timestamp + "\n")
     time.sleep(config['program']['waittimer'])
